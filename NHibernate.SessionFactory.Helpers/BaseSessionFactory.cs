@@ -186,9 +186,11 @@ namespace NHibernate.SessionFactory.Helpers
 		{
 			ISQLQuery sqlQuery = GetSqlQuery<S>(connectionStringKey, query);
 			parameters.ToList().ForEach(p => sqlQuery.SetParameter(p.Key, p.Value));
-			IList<int> retVal = sqlQuery.List<int>();
+			IList<SqlError> retVal = sqlQuery.List<SqlError>();
+			//IList retVal = sqlQuery.List();
 
-			return (retVal.Count > 0 && retVal.First() == 0 ? true : false);
+			if (retVal.Count > 0) { throw new Exception("Error during sql execution."); }
+			return (retVal.Count <= 0 ? true : false);
 		}
 
 		[Obsolete("Used for legacy support only.  Once legacy system are turned off this will be as well.  We should be using stored procedures for all saves going forward to support Temporal structures.")]
@@ -201,7 +203,7 @@ namespace NHibernate.SessionFactory.Helpers
 		}
 
 		/// <summary>
-		/// Creates the session factory.  Allowed to override per implementation
+		/// Creates the session factory. Allowed to override per implementation
 		/// </summary>
 		/// <param name="connectionStringKey">The connection string key.</param>
 		/// <returns>A session factory implementation</returns>

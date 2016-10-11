@@ -53,6 +53,7 @@
     <Compile Include="ITemporal.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Sql2016TemporalInterceptor.cs" />
+    <Compile Include="SqlError.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
