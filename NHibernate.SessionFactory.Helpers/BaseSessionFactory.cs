@@ -186,13 +186,22 @@ namespace NHibernate.SessionFactory.Helpers
 		public static bool SaveItem<S>(string connectionStringKey, string query, params KeyValuePair<string, string>[] parameters)
 			where S : BaseSessionFactory, new()
 		{
-			ISQLQuery sqlQuery = GetSqlQuery<S>(connectionStringKey, query);
-			parameters.ToList().ForEach(p => sqlQuery.SetParameter(p.Key, p.Value));
-			IList<SqlError> retVal = sqlQuery.List<SqlError>();
-			//IList retVal = sqlQuery.List();
+			try
+			{
+				ISQLQuery sqlQuery = GetSqlQuery<S>(connectionStringKey, query);
+				parameters.ToList().ForEach(p => sqlQuery.SetParameter(p.Key, p.Value));
+				var results = sqlQuery.List();
+				IList<SqlError> retErrors = new List<SqlError>();
+				foreach (SqlError error in results) { retErrors.Add(error); }
 
-			if (retVal.Count > 0) { throw new Exception("Error during sql execution."); }
-			return (retVal.Count <= 0 ? true : false);
+				if (retErrors.Count > 0) { throw new Exception(string.Format("Error during sql execution. {0}", retErrors.First().ErrorMessage)); }
+				return (results.Count <= 1 ? true : false);
+			}
+			catch(Exception ex)
+			{
+				throw new Exception("Error during sql execution.", ex);
+				return false;
+			}
 		}
 
 		[Obsolete("Used for legacy support only.  Once legacy system are turned off this will be as well.  We should be using stored procedures for all saves going forward to support Temporal structures.")]
