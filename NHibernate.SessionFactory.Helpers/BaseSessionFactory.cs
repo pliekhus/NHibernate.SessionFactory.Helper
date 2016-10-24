@@ -11,6 +11,8 @@ namespace NHibernate.SessionFactory.Helpers
 	/// </summary>
 	public abstract class BaseSessionFactory
 	{
+		private static object factoryLock = new object();
+
 		/// <summary>
 		/// Static collection of the session factories under management
 		/// </summary>
@@ -216,9 +218,12 @@ namespace NHibernate.SessionFactory.Helpers
 		/// <returns>An instance of the session factory</returns>
 		public ISessionFactory GetCurrent(string connectionStringKey)
 		{
-			if (!factories.ContainsKey(connectionStringKey))
+			lock (factoryLock)
 			{
-				factories.Add(connectionStringKey, CreateSessionFactory(connectionStringKey));
+				if (!factories.ContainsKey(connectionStringKey))
+				{
+					factories.Add(connectionStringKey, CreateSessionFactory(connectionStringKey));
+				}
 			}
 
 			return factories[connectionStringKey];
